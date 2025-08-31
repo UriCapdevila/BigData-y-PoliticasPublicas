@@ -55,7 +55,7 @@ plt.show()
 
 # Ranking de materias por tasa de promoción
 
-df["tasa_promocion"] = df["promocionados"] / df["inscriptos"]
+df["tasa_promocion"] = df["promociono"] / df["cantidad_inscriptos"]
 ranking = df.groupby("cod_materia")["tasa_promocion"].mean().sort_values(ascending=False)
 
 plt.figure(figsize=(10,8))
