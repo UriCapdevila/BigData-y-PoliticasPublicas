@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 # Crear columna de tasa de aprobación
 
-df["tasa_aprobacion"] = df["aprobados"] / df["inscriptos"]
+df["tasa_aprobacion"] = df["promociono"] / df["cantidad_inscriptos"]
 
 # Gráfico de barras
 
@@ -35,7 +35,7 @@ plt.show()
 # Gráfico comparativo de cupo vs inscriptos
 
 plt.figure(figsize=(12,6))
-df_plot = df[["comision", "cupo", "inscriptos"]].melt(id_vars="comision", value_vars=["cupo", "inscriptos"], var_name="Tipo", value_name="Cantidad")
+df_plot = df[["comision", "cupo_maximo", "cantidad_inscriptos"]].melt(id_vars="comision", value_vars=["cupo_maximo", "cantidad_inscriptos"], var_name="Tipo", value_name="Cantidad")
 sns.barplot(data=df_plot, x="comision", y="Cantidad", hue="Tipo", palette="Set2")
 plt.xticks(rotation=45)
 plt.title("Cupo vs. Inscriptos por comisión")
@@ -45,7 +45,7 @@ plt.show()
 # Gráfico de abandonos por materia
 
 plt.figure(figsize=(12,6))
-sns.barplot(data=df, x="cod_materia", y="abandonos", palette="rocket")
+sns.barplot(data=df, x="cod_materia", y="abandono", palette="rocket")
 plt.xticks(rotation=45)
 plt.title("Cantidad de abandonos por materia")
 plt.ylabel("Abandonos")
