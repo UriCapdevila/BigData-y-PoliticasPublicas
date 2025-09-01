@@ -1,86 +1,80 @@
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 import plotly.express as px
 import os
 
-# Crear carpetas si no existen
-os.makedirs("img", exist_ok=True)
+# 📁 Crear carpeta para guardar los gráficos interactivos
 os.makedirs("html", exist_ok=True)
 
-# Cargar ambas hojas del Excel
+# 📥 Cargar ambas hojas del Excel
 archivo = r"C:\Users\Uri_C\OneDrive\Documentos\GitHub\BigData-y-PoliticasPublicas\CSV\estadisticas2025paralumnos.xlsx"
 estadisticas = pd.read_excel(archivo, sheet_name="estadistica_fin_de_cursado")
 cupos = pd.read_excel(archivo, sheet_name="resultados_desgranamiento")
 
-# Unir las hojas por cod_materia y comision
+# 🔗 Unir las hojas por cod_materia y comision
 df = pd.merge(estadisticas, cupos, on=["cod_materia", "comision"], how="inner")
 
-# ================================
-# 📉 Gráfico estático: Cupo vs Inscriptos
-# ================================
-plt.figure(figsize=(16,8))
+# ============================================================
+# 📊 GRÁFICO INTERACTIVO 1: Cupo vs Inscriptos por comisión
+# ============================================================
+
+# 🔄 Reorganizar datos para mostrar cupo e inscriptos como categorías
 df_plot = df[["comision", "cupo_maximo", "cantidad_inscriptos"]].melt(
-    id_vars="comision",
-    value_vars=["cupo_maximo", "cantidad_inscriptos"],
-    var_name="Tipo",
-    value_name="Cantidad"
+    id_vars="comision",                      # Mantener la columna 'comision' como identificador
+    value_vars=["cupo_maximo", "cantidad_inscriptos"],  # Variables que se comparan
+    var_name="Tipo",                         # Nueva columna que indica si es cupo o inscriptos
+    value_name="Cantidad"                   # Valores numéricos
 )
-orden_comisiones = df.groupby("comision")["cantidad_inscriptos"].sum().sort_values(ascending=False).index
-sns.barplot(data=df_plot, x="comision", y="Cantidad", hue="Tipo", palette="Paired", order=orden_comisiones)
-plt.xticks(rotation=45, ha="right")
-plt.title("Comparación entre cupo máximo y cantidad de inscriptos por comisión", fontsize=14)
-plt.ylabel("Cantidad de alumnos")
-plt.xlabel("Comisión")
-plt.legend(title="Tipo de dato")
-for container in plt.gca().containers:
-    plt.gca().bar_label(container, fmt="%.0f", label_type="edge", fontsize=8)
-plt.tight_layout()
-plt.savefig("img/grafico_cupo_inscriptos.png", dpi=300, bbox_inches="tight")
-plt.close()
 
-# ================================
-# 🚪 Gráfico estático: Abandonos por materia
-# ================================
-plt.figure(figsize=(16,8))
-orden_materias = df.groupby("actividad")["abandono"].sum().sort_values(ascending=False).index
-sns.barplot(data=df, x="actividad", y="abandono", palette="mako", order=orden_materias)
-plt.xticks(rotation=90)
-plt.title("Cantidad total de abandonos por materia", fontsize=14)
-plt.ylabel("Cantidad de abandonos")
-plt.xlabel("Materia")
-for container in plt.gca().containers:
-    plt.gca().bar_label(container, fmt="%.0f", label_type="edge", fontsize=8)
-plt.tight_layout()
-plt.savefig("img/grafico_abandonos.png", dpi=300, bbox_inches="tight")
-plt.close()
-
-# ================================
-# 📊 Gráfico interactivo: Cupo vs Inscriptos
-# ================================
+# 📈 Crear gráfico de barras agrupadas
 fig_cupo = px.bar(
     df_plot,
-    x="comision",
-    y="Cantidad",
-    color="Tipo",
-    barmode="group",
-    title="Cupo vs. Inscriptos por comisión",
-    labels={"Cantidad": "Cantidad de alumnos", "comision": "Comisión"}
+    x="comision",                            # Eje X: comisiones
+    y="Cantidad",                            # Eje Y: cantidad de alumnos
+    color="Tipo",                            # Color por tipo (cupo o inscriptos)
+    barmode="group",                         # Barras agrupadas
+    title="Cupo vs. Inscriptos por comisión",# Título del gráfico
+    labels={"Cantidad": "Cantidad de alumnos", "comision": "Comisión"}  # Etiquetas personalizadas
 )
-fig_cupo.update_layout(xaxis_tickangle=-45)
+
+# 🎨 Ajustes visuales del gráfico
+fig_cupo.update_layout(
+    xaxis_tickangle=-45                     # Rotar etiquetas del eje X para mejor lectura
+)
+
+# 💾 Guardar gráfico como archivo HTML
 fig_cupo.write_html("html/comision_cupo_vs_inscriptos.html")
 
-# ================================
-# 📊 Gráfico interactivo: Abandonos por materia
-# ================================
+# ============================================================
+# 📊 GRÁFICO INTERACTIVO 2: Abandonos por materia (barras verticales)
+# ============================================================
+
+# 📊 Agrupar y ordenar datos por cantidad de abandonos
 df_abandonos = df.groupby("actividad")["abandono"].sum().reset_index()
 df_abandonos = df_abandonos.sort_values(by="abandono", ascending=False)
+
+# 📈 Crear gráfico de barras verticales
 fig_abandonos = px.bar(
     df_abandonos,
-    x="actividad",
-    y="abandono",
+    x="actividad",                          # Eje X: materias
+    y="abandono",                           # Eje Y: cantidad de abandonos
     title="Cantidad de abandonos por materia",
-    labels={"actividad": "Materia", "abandono": "Cantidad de abandonos"}
+    labels={"actividad": "Materia", "abandono": "Cantidad de abandonos"},
+    color="abandono",                       # Color según cantidad de abandonos
+    color_continuous_scale="Reds"           # Escala de color: de claro a oscuro
 )
-fig_abandonos.update_layout(xaxis_tickangle=-90)
+
+# 🎨 Ajustes visuales del gráfico
+fig_abandonos.update_layout(
+    xaxis_tickangle=-45,                    # Rotar etiquetas del eje X
+    xaxis_title="Materia",                  # Título del eje X
+    yaxis_title="Cantidad de abandonos",    # Título del eje Y
+    font=dict(size=10),                     # Tamaño general de fuente
+    xaxis=dict(tickfont=dict(size=9)),      # Tamaño de etiquetas del eje X
+    yaxis=dict(tickfont=dict(size=9)),      # Tamaño de etiquetas del eje Y
+    bargap=0.02,                             # Espacio entre grupos de barras (más chico = barras más gruesas)
+    bargroupgap=0.04,                        # Espacio entre barras dentro del mismo grupo
+    margin=dict(t=60, b=120)                # Margen superior e inferior para evitar solapamiento
+)
+
+# 💾 Guardar gráfico como archivo HTML
 fig_abandonos.write_html("html/abandonos_por_materia.html")
