@@ -21,19 +21,6 @@ print(df.columns)
 print(df.info())
 print(df.describe())
 
-# Crear columna de tasa de aprobación
-df["tasa_aprobacion"] = df["promociono"] / df["cantidad_inscriptos"]
-
-# 📊 Gráfico de tasa de aprobación por comisión
-plt.figure(figsize=(12,6))
-sns.barplot(data=df, x="comision", y="tasa_aprobacion", palette="viridis")
-plt.xticks(rotation=45)
-plt.title("Tasa de aprobación por comisión")
-plt.ylabel("Tasa de aprobación")
-plt.xlabel("Comisión")
-plt.tight_layout()
-plt.savefig("img/grafico_aprobacion.png", dpi=300, bbox_inches="tight")
-plt.show()
 
 # 📉 Gráfico comparativo de cupo vs inscriptos
 plt.figure(figsize=(12,6))
